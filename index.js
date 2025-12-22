@@ -29,3 +29,36 @@ app.get('/', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+app.use(express.json());
+
+app.post('/posts', async (req, res) => {
+  try {
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'Post content is required' });
+    }
+
+    const result = await pool.query(
+      'INSERT INTO posts (content) VALUES ($1) RETURNING *',
+      [content]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/posts', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM posts ORDER BY created_at DESC'
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
