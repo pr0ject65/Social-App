@@ -7,11 +7,11 @@ dotenv.config();
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Loaded successfully! (hidden for security)' : 'MISSING - Check .env!');
 
 const app = express();
-app.use(express.json());
+app.use(express.json());  // ← Keep this early (only once!)
 
 const PORT = process.env.PORT || 3000;
 
-// Test endpoint – proves server + Neon DB connection works
+// Root endpoint – health check
 app.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
@@ -26,11 +26,17 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+// ADD THESE ROUTES BEFORE app.listen() !!
+app.get('/posts', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM posts ORDER BY created_at DESC'
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
-
-app.use(express.json());
 
 app.post('/posts', async (req, res) => {
   try {
@@ -51,14 +57,7 @@ app.post('/posts', async (req, res) => {
   }
 });
 
-app.get('/posts', async (req, res) => {
-  try {
-    const result = await pool.query(
-      'SELECT * FROM posts ORDER BY created_at DESC'
-    );
-
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// Start server LAST
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
