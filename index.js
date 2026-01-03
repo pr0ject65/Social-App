@@ -11,7 +11,7 @@ app.use(express.json());  // ← Keep this early (only once!)
 
 const PORT = process.env.PORT || 3000;
 
-// Root endpoint – health check
+
 app.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
@@ -26,7 +26,6 @@ app.get('/', async (req, res) => {
   }
 });
 
-// ADD THESE ROUTES BEFORE app.listen() !!
 app.get('/posts', async (req, res) => {
   try {
     const result = await pool.query(
