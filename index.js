@@ -74,6 +74,28 @@ app.post('/posts', upload.single('image'), async (req, res) => {
   }
 });
 
+app.post('/posts-with-image', upload.single('image'), async (req, res) => {
+  try {
+    const { content, user_id } = req.body;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+    if (!content || !user_id) {
+      return res.status(400).json({ error: 'content and user_id are required' });
+    }
+
+    const result = await pool.query(
+      'INSERT INTO posts (content, user_id, image_url) VALUES ($1, $2, $3) RETURNING *',
+      [content, user_id, imageUrl]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // Start server LAST
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
