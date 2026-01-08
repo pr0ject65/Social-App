@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
 
-app.use('/uploads', express.static('uploads'));
 
 dotenv.config();
 
@@ -23,8 +22,9 @@ const upload = multer({ storage });
 const app = express();
 app.use(express.json());  // ← Keep this early (only once!)
 
-const PORT = process.env.PORT || 3000;
+app.use('/uploads', express.static('uploads'));
 
+const PORT = process.env.PORT || 3000;
 
 app.get('/', async (req, res) => {
   try {
